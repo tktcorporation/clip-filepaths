@@ -30,28 +30,7 @@ impl ClipboardOperations for RealClipboard {
     // 内容をクリア
     pasteboard.clear_contents();
 
-    // タイプを宣言
-    let file_url_type = ObjcString::from_str("public.file-url").ok_or_else(|| {
-      Error::new(
-        ErrorKind::Other,
-        "Failed to create NSString for file URL type",
-      )
-    })?;
-
-    let filenames_type = ObjcString::from_str("NSFilenamesPboardType").ok_or_else(|| {
-      Error::new(
-        ErrorKind::Other,
-        "Failed to create NSString for filenames type",
-      )
-    })?;
-
-    let types = vec![file_url_type.as_id(), filenames_type.as_id()];
-    let types_array = ObjcArray::from_vec(&types)
-      .ok_or_else(|| Error::new(ErrorKind::Other, "Failed to create types array"))?;
-
-    pasteboard.declare_types(&types_array);
-
-    // URLの配列を作成
+    // URLの配列を作成（writeObjectsが自動的にタイプを管理）
     let urls_array = ObjcArray::from_vec(&urls)
       .ok_or_else(|| Error::new(ErrorKind::Other, "Failed to create URLs array"))?;
 
@@ -132,34 +111,6 @@ pub fn write_clipboard_file_paths(paths: &[String]) -> Result<(), Error> {
   if !errors.is_empty() {
     let error_message = format!("Some paths could not be processed: {}", errors.join("; "));
     return Err(Error::new(ErrorKind::InvalidInput, error_message));
-  }
-
-  // クリップボードのタイプを設定
-  let file_url_type = ObjcString::from_str("public.file-url").ok_or_else(|| {
-    Error::new(
-      ErrorKind::Other,
-      "Failed to create NSString for file URL type",
-    )
-  })?;
-
-  let filenames_type = ObjcString::from_str("NSFilenamesPboardType").ok_or_else(|| {
-    Error::new(
-      ErrorKind::Other,
-      "Failed to create NSString for filenames type",
-    )
-  })?;
-
-  let types = vec![file_url_type.as_id(), filenames_type.as_id()];
-  let types_array = ObjcArray::from_vec(&types)
-    .ok_or_else(|| Error::new(ErrorKind::Other, "Failed to create types array"))?;
-
-  // タイプを宣言
-  let declared = pasteboard.declare_types(&types_array);
-  if !declared {
-    return Err(Error::new(
-      ErrorKind::Other,
-      "Failed to declare pasteboard types",
-    ));
   }
 
   // URLの配列を作成
