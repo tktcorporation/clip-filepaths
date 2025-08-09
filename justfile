@@ -17,19 +17,8 @@ _default:
 # or install via `cargo install cargo-binstall`
 # Initialize the project by installing all the necessary tools.
 init:
-  cargo install cargo-binstall
-  # Rust related init
-  cargo binstall watchexec-cli cargo-insta typos-cli cargo-shear dprint -y
-
-  # toolchain
-  rustup component add clippy
-  rustup component add rustfmt
-
-  # npm install -g pnpm typescript @napi-rs/cli @antfu/ni
-  # Node.js related init
-  yarn install
-  # Linuxの依存関係をインストール
-  just install-linux-deps
+  # Install all tools and run post-install hooks
+  mise install
 
 # 全てのチェックを実行
 check: check-format check-lint
