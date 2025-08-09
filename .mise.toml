@@ -28,10 +28,14 @@ experimental = true
 # Explicitly enable idiomatic version files for node
 idiomatic_version_file_enable_tools = ["node"]
 
+[tasks.linux-deps]
+description = "Install Linux system dependencies for X11 clipboard support"
+run = "./scripts/install-linux-deps.sh"
+
 [hooks]
 postinstall = [
   "rustup component add clippy",
   "rustup component add rustfmt",
   "ni",
-  "bash -c 'if [[ \"$OSTYPE\" == \"linux-gnu\"* ]]; then just install-linux-deps; fi'"
+  "./scripts/install-linux-deps.sh"
 ]

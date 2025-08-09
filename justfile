@@ -165,23 +165,7 @@ doc:
 [linux]
 install-linux-deps:
   @echo "📦 Linux依存関係をインストール中..."
-  sudo apt-get update -y
-  sudo apt-get install -y \
-    libx11-dev \
-    libxext-dev \
-    libxrender-dev \
-    libxtst-dev \
-    libxinerama-dev \
-    xvfb \
-    x11-apps \
-    libxcb1-dev \
-    libxcb-render0-dev \
-    libxcb-shape0-dev \
-    libxcb-xfixes0-dev \
-    xclip \
-    x11-apps \
-    xvfb \
-    xauth
+  ./scripts/install-linux-deps.sh
 
 # Linuxの依存関係をインストール（何もしない、Windowsの場合）
 [windows]
