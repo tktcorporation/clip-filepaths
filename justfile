@@ -17,19 +17,8 @@ _default:
 # or install via `cargo install cargo-binstall`
 # Initialize the project by installing all the necessary tools.
 init:
-  cargo install cargo-binstall
-  # Rust related init
-  cargo binstall watchexec-cli cargo-insta typos-cli cargo-shear dprint -y
-
-  # toolchain
-  rustup component add clippy
-  rustup component add rustfmt
-
-  # npm install -g pnpm typescript @napi-rs/cli @antfu/ni
-  # Node.js related init
-  yarn install
-  # Linuxの依存関係をインストール
-  just install-linux-deps
+  # Install all tools and run post-install hooks
+  mise install
 
 # 全てのチェックを実行
 check: check-format check-lint
@@ -176,23 +165,7 @@ doc:
 [linux]
 install-linux-deps:
   @echo "📦 Linux依存関係をインストール中..."
-  sudo apt-get update -y
-  sudo apt-get install -y \
-    libx11-dev \
-    libxext-dev \
-    libxrender-dev \
-    libxtst-dev \
-    libxinerama-dev \
-    xvfb \
-    x11-apps \
-    libxcb1-dev \
-    libxcb-render0-dev \
-    libxcb-shape0-dev \
-    libxcb-xfixes0-dev \
-    xclip \
-    x11-apps \
-    xvfb \
-    xauth
+  ./scripts/install-linux-deps.sh
 
 # Linuxの依存関係をインストール（何もしない、Windowsの場合）
 [windows]

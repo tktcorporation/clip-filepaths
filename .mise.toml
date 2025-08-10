@@ -1,0 +1,41 @@
+# mise configuration file
+# https://mise.jdx.dev/configuration.html
+
+[tools]
+# Rust toolchain
+rust = "stable"
+node = "lts"
+zig = "latest"
+
+# cargo-binstall for faster binary installations
+"cargo:cargo-binstall" = "latest"
+
+# Rust development tools
+"cargo:watchexec-cli" = "latest"
+"cargo:cargo-insta" = "latest"
+"cargo:typos-cli" = "latest"
+"cargo:cargo-shear" = "latest"
+"cargo:dprint" = "latest"
+
+# Node.js global packages
+"npm:yarn" = "latest"
+"npm:@napi-rs/cli" = "latest"
+"npm:@antfu/ni" = "latest"
+
+[settings]
+# Enable automatic installation of tools
+experimental = true
+# Explicitly enable idiomatic version files for node
+idiomatic_version_file_enable_tools = ["node"]
+
+[tasks.linux-deps]
+description = "Install Linux system dependencies for X11 clipboard support"
+run = "./scripts/install-linux-deps.sh"
+
+[hooks]
+postinstall = [
+  "rustup component add clippy",
+  "rustup component add rustfmt",
+  "ni",
+  "./scripts/install-linux-deps.sh"
+]
