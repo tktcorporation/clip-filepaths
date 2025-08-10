@@ -224,11 +224,6 @@ impl Pasteboard {
     unsafe { msg_send![self.pasteboard, clearContents] }
   }
 
-  /// ペーストボードにタイプを宣言
-  pub fn declare_types(&self, types_array: &ObjcArray) -> bool {
-    unsafe { msg_send![self.pasteboard, declareTypes:types_array.as_id() owner:nil] }
-  }
-
   /// ペーストボードにオブジェクトを書き込む
   pub fn write_objects(&self, objects_array: &ObjcArray) -> bool {
     unsafe { msg_send![self.pasteboard, writeObjects:objects_array.as_id()] }
