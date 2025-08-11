@@ -1,11 +1,62 @@
 # Changelog
 ## [unreleased]
 
+### Bug Fixes
+
+
+
+- **(mac)** Unable to paste files in some apps ([#27](https://github.com/tktcorporation/clip-filepaths/issues/27)) ([8ddae03](https://github.com/tktcorporation/clip-filepaths/commit/8ddae034428b7d438b64c01882ef634d95ab104e))
+
+### Miscellaneous Tasks
+
+
+
+- **(deps)** Bump the npm_and_yarn group across 1 directory with 2 updates ([#25](https://github.com/tktcorporation/clip-filepaths/issues/25)) ([9365763](https://github.com/tktcorporation/clip-filepaths/commit/93657637b158388c48a6e6e8ec7329bdbb5c4fe3))
+
+## [0.2.0] - 2025-05-13
+
 ### Documentation
 
 
 
-- Update docsmentations ([d7c9c55](https://github.com/tktcorporation/clip-filepaths/commit/d7c9c55958144d9bbd7ce80f87a77ab1b8c6e66f))
+- Update README.md ([a9ccb70](https://github.com/tktcorporation/clip-filepaths/commit/a9ccb704eee79e838b2d141dd25f128312393cce))
+
+### Features
+
+
+
+- Impl `readClipboardFilePaths` func. Rename `copyFiles` to `writeClipboardFilePaths` ([#23](https://github.com/tktcorporation/clip-filepaths/issues/23)) ([1f9ce1d](https://github.com/tktcorporation/clip-filepaths/commit/1f9ce1d0966d1d7db61fd218f82daf517dd249e3))
+
+### Miscellaneous Tasks
+
+
+
+- **(deps)** Bump vite from 6.3.3 to 6.3.4 ([#19](https://github.com/tktcorporation/clip-filepaths/issues/19)) ([82a69ef](https://github.com/tktcorporation/clip-filepaths/commit/82a69ef05d466340eca67c29c1860c1dac02a9d3))
+
+## [0.1.2] - 2025-04-29
+
+### Documentation
+
+
+
+- Add a demo app info to README ([52eb14a](https://github.com/tktcorporation/clip-filepaths/commit/52eb14a76d464829c9abbf3bacd6d50f39d63eee))
+
+## [0.1.0] - 2025-04-28
+
+### Documentation
+
+
+
+- Update documentations ([08ac1ab](https://github.com/tktcorporation/clip-filepaths/commit/08ac1ab3f97b6219f3902c349e1a0a6b62e11c0f))
+
+
+- Update documentations ([b7b2412](https://github.com/tktcorporation/clip-filepaths/commit/b7b2412137686cccafd2650cd1f71eeb8f385a0f))
+
+### Miscellaneous Tasks
+
+
+
+- **(rename)** Electron-pan-clip -> clip-filepaths ([dba183f](https://github.com/tktcorporation/clip-filepaths/commit/dba183f0082f4db8f66d532b4860195baedcf1ca))
 
 ## [0.0.32] - 2025-04-27
 
