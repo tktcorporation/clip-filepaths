@@ -10,8 +10,9 @@ permissions:
   push:
     branches:
       - main
-    tags-ignore:
-      - '**'
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - 'v[0-9]+.[0-9]+.[0-9]+-*'
     paths-ignore:
       - '**/*.md'
       - LICENSE
@@ -173,8 +174,9 @@ jobs:
           - host: windows-latest
             target: x86_64-pc-windows-msvc
         node:
-          - '18'
           - '20'
+          - '22'
+          - '24'
     runs-on: ${{ matrix.settings.host }}
     steps:
       - uses: actions/checkout@v4
@@ -204,8 +206,9 @@ jobs:
       fail-fast: false
       matrix:
         node:
-          - '18'
           - '20'
+          - '22'
+          - '24'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -234,8 +237,9 @@ jobs:
       fail-fast: false
       matrix:
         node:
-          - '18'
           - '20'
+          - '22'
+          - '24'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -268,6 +272,7 @@ jobs:
         node:
           - '20'
           - '22'
+          - '24'
     runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@v4
@@ -351,12 +356,20 @@ jobs:
       - name: Publish
         run: |
           npm config set provenance true
-          if git log -1 --pretty=%B | grep "^[0-9]\+\.[0-9]\+\.[0-9]\+$";
-          then
+          if [[ "${{ github.ref }}" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Publishing stable version from tag: ${{ github.ref }}"
             echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
             npm publish --access public
-          elif git log -1 --pretty=%B | grep "^[0-9]\+\.[0-9]\+\.[0-9]\+";
-          then
+          elif [[ "${{ github.ref }}" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+- ]]; then
+            echo "Publishing pre-release version from tag: ${{ github.ref }}"
+            echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
+            npm publish --tag next --access public
+          elif git log -1 --pretty=%B | grep "^[0-9]\+\.[0-9]\+\.[0-9]\+$"; then
+            echo "Publishing stable version from commit message"
+            echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
+            npm publish --access public
+          elif git log -1 --pretty=%B | grep "^[0-9]\+\.[0-9]\+\.[0-9]\+"; then
+            echo "Publishing pre-release version from commit message"
             echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> ~/.npmrc
             npm publish --tag next --access public
           else
