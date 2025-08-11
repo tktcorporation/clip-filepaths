@@ -18,8 +18,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Error Handling Refactor and Clipboard Handling Improvements ([#24](https://github.com/tktcorporation/clip-filepaths/issues/24))
 - Migrate development environment to mise ([#28](https://github.com/tktcorporation/clip-filepaths/issues/28))
-- Release v0.3.0
-- Improve git-cliff configuration with Keep a Changelog format
 
 ## [0.2.0] - 2025-05-13
 
