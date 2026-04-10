@@ -36,9 +36,10 @@ runs:
         echo "INSTALLED_TOOLS=$(echo $INSTALLED_TOOLS | jq -c '. += ["Just (バージョン: ${{ inputs.just-version }})"]')" >> $GITHUB_ENV
         echo "ACTION_SUMMARY=$(echo $ACTION_SUMMARY | jq -c '. += ["Justコマンドをインストールしました"]')" >> $GITHUB_ENV
 
-    # rust-toolchain.toml を SSOT として読み取る
+    # rust-toolchain.toml を SSOT として読み取り、rustup が自動でインストール
     - name: Setup Rust (rust-toolchain.toml)
-      uses: dtolnay/rust-toolchain@master
+      shell: bash
+      run: rustup show
 
     - name: Rust設定情報記録
       shell: bash

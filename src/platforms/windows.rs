@@ -45,7 +45,7 @@ fn to_wide_null(s: &str) -> Vec<u16> {
 
 // HGLOBAL用のGlobalFree関数（Kernel32.dllから直接インポート）
 #[link(name = "kernel32")]
-extern "system" {
+unsafe extern "system" {
   fn GlobalFree(hMem: *mut c_void) -> *mut c_void;
 }
 
