@@ -110,7 +110,7 @@ pub fn write_clipboard_file_paths(paths: Vec<String>) -> Result<(), NapiError> {
     for p in &paths {
       if let Err(e) = fs::canonicalize(p) {
         // Linux/macOS 実装に合わせてメッセージを生成
-        errors.push(format!("Failed to canonicalize path {}: {}", p, e));
+        errors.push(format!("Failed to canonicalize path {p}: {e}"));
       }
     }
 
@@ -118,7 +118,7 @@ pub fn write_clipboard_file_paths(paths: Vec<String>) -> Result<(), NapiError> {
       let joined = errors.join("; ");
       let io_err = IoError::new(
         ErrorKind::InvalidInput,
-        format!("Some paths could not be processed: {}", joined),
+        format!("Some paths could not be processed: {joined}"),
       );
       // OS名前付きの共通メッセージに変換
       return Err(platform_error_to_napi(io_err));
@@ -257,7 +257,7 @@ mod tests {
   #[test]
   fn test_write_clipboard_file_paths_empty_input() {
     let result = write_clipboard_file_paths(vec![]);
-    println!("test_write_clipboard_file_paths_empty_input: {:?}", result);
+    println!("test_write_clipboard_file_paths_empty_input: {result:?}");
     assert!(result.is_ok());
   }
 
@@ -270,13 +270,13 @@ mod tests {
 
     for i in 0..2 {
       let mut path = temp_dir();
-      path.push(format!("electron_pan_clip_test_{}.txt", i));
+      path.push(format!("electron_pan_clip_test_{i}.txt"));
 
       let file_path = path.to_string_lossy().to_string();
 
       // ファイルを作成して何か書き込む
       let mut file = File::create(&path).expect("Failed to create test file");
-      writeln!(file, "Test content {}", i).expect("Failed to write to test file");
+      writeln!(file, "Test content {i}").expect("Failed to write to test file");
 
       temp_files.push(file_path);
     }
@@ -285,7 +285,7 @@ mod tests {
     let result = write_clipboard_file_paths(temp_files.clone());
 
     // コピー成功を確認
-    assert!(result.is_ok(), "Failed to copy files: {:?}", result);
+    assert!(result.is_ok(), "Failed to copy files: {result:?}");
 
     // ここではクリップボードの内容を自動的に検証することは難しいため、
     // 成功したことだけを確認する
@@ -305,13 +305,13 @@ mod tests {
 
     for i in 0..2 {
       let mut path = temp_dir();
-      path.push(format!("electron_pan_clip_test_results_{}.txt", i));
+      path.push(format!("electron_pan_clip_test_results_{i}.txt"));
 
       let file_path_str = path.to_string_lossy().to_string();
 
       // ファイルを作成
       let mut file = File::create(&path).expect("Failed to create test file");
-      writeln!(file, "Test content {}", i).expect("Failed to write to test file");
+      writeln!(file, "Test content {i}").expect("Failed to write to test file");
 
       test_paths.push(file_path_str);
       canonical_paths.push(path.canonicalize().unwrap().to_string_lossy().to_string());

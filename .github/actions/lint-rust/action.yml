@@ -2,14 +2,6 @@ name: 'Rustコードのlint'
 description: 'ClippyとRustfmtによるRustコード品質チェック'
 
 inputs:
-  toolchain:
-    description: 'Rustのツールチェーン'
-    required: false
-    default: 'stable'
-  components:
-    description: 'インストールするコンポーネント'
-    required: false
-    default: 'rustfmt, clippy'
   clippy-options:
     description: 'Clippyのオプション'
     required: false
@@ -35,8 +27,6 @@ runs:
     - name: Setup Rust環境
       uses: ./.github/actions/setup-rust
       with:
-        toolchain: ${{ inputs.toolchain }}
-        components: ${{ inputs.components }}
         cache-key: ${{ inputs.cache-key }}
         install-dependencies: 'true'
         
@@ -105,8 +95,7 @@ runs:
         echo "## 🦀 Rustコードのlint サマリー" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### 📊 実行情報" >> $GITHUB_STEP_SUMMARY
-        echo "- **Rustツールチェーン:** ${{ inputs.toolchain }}" >> $GITHUB_STEP_SUMMARY
-        echo "- **使用コンポーネント:** ${{ inputs.components }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Rustツールチェーン:** $(rustc --version)" >> $GITHUB_STEP_SUMMARY
         echo "- **Clippyオプション:** \`${{ inputs.clippy-options }}\`" >> $GITHUB_STEP_SUMMARY
         echo "- **ドキュメントチェック:** ${{ inputs.check-documentation }}" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY

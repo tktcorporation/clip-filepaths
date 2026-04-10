@@ -18,7 +18,7 @@ pub fn write_clipboard_file_paths(paths: &[String]) -> Result<(), Error> {
       let canonical_path = match fs::canonicalize(path) {
         Ok(p) => p,
         Err(e) => {
-          errors.push(format!("Failed to canonicalize path {}: {}", path, e));
+          errors.push(format!("Failed to canonicalize path {path}: {e}"));
           continue;
         }
       };
@@ -74,8 +74,7 @@ pub fn write_clipboard_file_paths(paths: &[String]) -> Result<(), Error> {
       exit_status.code()
     ))),
     Err(e) => Err(Error::other(format!(
-      "Failed to execute xclip command: {}",
-      e
+      "Failed to execute xclip command: {e}"
     ))),
   }
 }
@@ -98,7 +97,7 @@ pub fn read_clipboard_text() -> Result<String, Error> {
     }
   } else {
     let error = String::from_utf8_lossy(&output.stderr).into_owned();
-    Err(Error::other(format!("Failed to read clipboard: {}", error)))
+    Err(Error::other(format!("Failed to read clipboard: {error}")))
   }
 }
 
@@ -120,8 +119,7 @@ pub fn read_clipboard_raw() -> Result<Vec<u8>, Error> {
   } else {
     let error = String::from_utf8_lossy(&output.stderr).into_owned();
     Err(Error::other(format!(
-      "Failed to read clipboard raw data: {}",
-      error
+      "Failed to read clipboard raw data: {error}"
     )))
   }
 }
@@ -174,8 +172,7 @@ pub fn read_clipboard_file_paths() -> Result<Vec<String>, Error> {
   } else {
     let error = String::from_utf8_lossy(&output.stderr).into_owned();
     Err(Error::other(format!(
-      "Failed to read clipboard for file paths: {}",
-      error
+      "Failed to read clipboard for file paths: {error}"
     )))
   }
 }
@@ -226,9 +223,11 @@ mod tests {
     // エラーの種類とメッセージを検証
     if let Err(err) = result {
       assert_eq!(err.kind(), ErrorKind::InvalidInput);
-      assert!(err
-        .to_string()
-        .contains("Some paths could not be processed"));
+      assert!(
+        err
+          .to_string()
+          .contains("Some paths could not be processed")
+      );
     }
   }
 
@@ -252,12 +251,12 @@ mod tests {
         || e.to_string().contains("No text property")
       // Wayland で発生しうるエラー
       {
-        println!("⚠️ クリップボードテストをスキップ: 環境の問題 ({})", e);
+        println!("⚠️ クリップボードテストをスキップ: 環境の問題 ({e})");
         return;
       }
     }
 
-    assert!(result.is_ok(), "Copy operation failed: {:?}", result);
+    assert!(result.is_ok(), "Copy operation failed: {result:?}");
 
     let _ = std::fs::remove_file(test_file_path);
   }

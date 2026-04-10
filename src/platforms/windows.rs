@@ -1,8 +1,8 @@
 #![cfg(target_os = "windows")]
 
-use std::ffi::c_void;
 use std::ffi::OsStr;
 use std::ffi::OsString;
+use std::ffi::c_void;
 use std::io::{Error, ErrorKind};
 use std::iter::once;
 use std::mem::{size_of, zeroed};
@@ -19,7 +19,7 @@ use windows_sys::Win32::{
       CloseClipboard, EmptyClipboard, GetClipboardData, IsClipboardFormatAvailable, OpenClipboard,
       SetClipboardData,
     },
-    Memory::{GlobalAlloc, GlobalLock, GlobalSize, GlobalUnlock, GMEM_MOVEABLE},
+    Memory::{GMEM_MOVEABLE, GlobalAlloc, GlobalLock, GlobalSize, GlobalUnlock},
   },
   UI::Shell::DragQueryFileW,
 };

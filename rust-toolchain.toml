@@ -1,4 +1,6 @@
 [toolchain]
-channel = "stable"
+# プロジェクト全体の Rust バージョンを定義する唯一の場所 (SSOT)。
+# ローカル開発・CI・Docker ビルドすべてでこのバージョンが使われる。
+# rustup がこのファイルを検出し、自動的に該当バージョンをインストール・使用する。
+channel = "1.88.0"
 components = ["rustfmt", "clippy"]
-profile = "default"

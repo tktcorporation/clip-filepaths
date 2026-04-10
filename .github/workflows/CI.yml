@@ -40,6 +40,7 @@ jobs:
             target: x86_64-unknown-linux-gnu
             docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-debian
             build: |
+              rustup show
               echo "Installing dependencies for x86_64 native compilation..."
               sudo apt-get update
               sudo apt-get install -y --no-install-recommends \
@@ -52,6 +53,7 @@ jobs:
             target: x86_64-unknown-linux-musl
             docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-alpine
             build: |
+              rustup show
               echo "Installing dependencies for x86_64-unknown-linux-musl native compilation..."
               apk add --no-cache \
                 pkgconf \
@@ -70,6 +72,7 @@ jobs:
             target: aarch64-unknown-linux-gnu
             docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-debian-aarch64
             build: |
+              rustup show
               echo "Installing dependencies for aarch64-unknown-linux-gnu native compilation..."
               sudo apt-get update
               sudo apt-get install -y --no-install-recommends \
@@ -85,6 +88,7 @@ jobs:
             target: aarch64-unknown-linux-musl
             docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-alpine
             build: |
+              rustup show
               echo "Installing dependencies for aarch64-unknown-linux-musl native compilation..."
               apk add --no-cache \
                 pkgconf \
@@ -109,11 +113,10 @@ jobs:
         with:
           node-version: 20
           cache: yarn
-      - name: Install
-        uses: dtolnay/rust-toolchain@stable
+      - name: Install Rust (reads rust-toolchain.toml)
+        uses: dtolnay/rust-toolchain@master
         if: ${{ !matrix.settings.docker }}
         with:
-          toolchain: stable
           targets: ${{ matrix.settings.target }}
       - name: Cache cargo
         uses: actions/cache@v4

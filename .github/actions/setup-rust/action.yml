@@ -2,14 +2,6 @@ name: 'Rustセットアップ'
 description: 'Rustツールチェーンとその依存関係のセットアップ'
 
 inputs:
-  toolchain:
-    description: 'Rustのツールチェーン'
-    required: false
-    default: 'stable'
-  components:
-    description: 'インストールするコンポーネント'
-    required: false
-    default: 'rustfmt, clippy'
   cache-key:
     description: 'キャッシュのキー'
     required: false
@@ -44,21 +36,16 @@ runs:
         echo "INSTALLED_TOOLS=$(echo $INSTALLED_TOOLS | jq -c '. += ["Just (バージョン: ${{ inputs.just-version }})"]')" >> $GITHUB_ENV
         echo "ACTION_SUMMARY=$(echo $ACTION_SUMMARY | jq -c '. += ["Justコマンドをインストールしました"]')" >> $GITHUB_ENV
 
-    # rustupを使用
-    - name: Setup Rust
-      uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: ${{ inputs.toolchain }}
-        override: true
-        components: ${{ inputs.components }}
-    
+    # rust-toolchain.toml を SSOT として読み取る
+    - name: Setup Rust (rust-toolchain.toml)
+      uses: dtolnay/rust-toolchain@master
+
     - name: Rust設定情報記録
       shell: bash
       run: |
-        echo "INSTALLED_TOOLS=$(echo $INSTALLED_TOOLS | jq -c '. += ["Rust (ツールチェーン: ${{ inputs.toolchain }})"]')" >> $GITHUB_ENV
-        echo "ACTION_SUMMARY=$(echo $ACTION_SUMMARY | jq -c '. += ["Rustツールチェーン (${{ inputs.toolchain }}) をセットアップしました"]')" >> $GITHUB_ENV
-        echo "ACTION_SUMMARY=$(echo $ACTION_SUMMARY | jq -c '. += ["コンポーネント: ${{ inputs.components }} をインストールしました"]')" >> $GITHUB_ENV
+        RUST_VERSION=$(rustc --version)
+        echo "INSTALLED_TOOLS=$(echo $INSTALLED_TOOLS | jq -c '. += ["Rust (${RUST_VERSION})"]')" >> $GITHUB_ENV
+        echo "ACTION_SUMMARY=$(echo $ACTION_SUMMARY | jq -c '. += ["rust-toolchain.toml からRustをセットアップしました"]')" >> $GITHUB_ENV
         
     - name: Linux依存関係をインストール
       if: runner.os == 'Linux' && inputs.install-dependencies == 'true'
@@ -81,8 +68,7 @@ runs:
         echo "## 🦀 Rustセットアップ サマリー" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### 📊 実行情報" >> $GITHUB_STEP_SUMMARY
-        echo "- **Rustツールチェーン:** ${{ inputs.toolchain }}" >> $GITHUB_STEP_SUMMARY
-        echo "- **コンポーネント:** ${{ inputs.components }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Rustツールチェーン:** $(rustc --version)" >> $GITHUB_STEP_SUMMARY
         echo "- **Linux依存関係インストール:** ${{ inputs.install-dependencies }}" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         

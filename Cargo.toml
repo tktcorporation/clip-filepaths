@@ -1,11 +1,10 @@
 [package]
-edition = "2021"
+edition = "2024"
 name = "clip-filepaths"
 version = "0.1.0"
-# napi-rs CI Docker イメージの Rust バージョンに合わせた MSRV。
-# 依存クレートのバージョン上限もこの MSRV に基づいて決定している。
-# 変更時は Cargo.lock の再生成と CI Docker イメージの Rust バージョン確認が必要。
-rust-version = "1.82"
+# rust-toolchain.toml の channel と一致させること。
+# edition 2024 の resolver v3 がこの値を使って依存の互換性を自動チェックする。
+rust-version = "1.88"
 
 [lib]
 crate-type = ["cdylib"]
@@ -14,7 +13,7 @@ crate-type = ["cdylib"]
 # Default enable napi4 feature, see https://nodejs.org/api/n-api.html#node-api-version-matrix
 napi = { version = "2.16.17", default-features = false, features = ["napi4"] }
 napi-derive = "2.16.13"
-url = ">=2.5.2, <2.5.3"
+url = "2.5"
 
 # Windows 依存
 [target.'cfg(target_os = "windows")'.dependencies]
@@ -39,8 +38,7 @@ x11 = { version = "2.21.0", features = ["xlib"] }
 libc = "0.2.169"
 
 [build-dependencies]
-# >=2.2 は MSRV 1.82 を超える Rust バージョンを要求するためピン
-napi-build = ">=2.1.3, <2.2"
+napi-build = "2"
 
 [profile.release]
 lto = true
