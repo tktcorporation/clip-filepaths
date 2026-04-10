@@ -10,7 +10,6 @@ crate-type = ["cdylib"]
 # Default enable napi4 feature, see https://nodejs.org/api/n-api.html#node-api-version-matrix
 napi = { version = "2.16.17", default-features = false, features = ["napi4"] }
 napi-derive = "2.16.13"
-arboard = "3.6.1"
 url = "2.5.8"
 
 # Windows 依存
