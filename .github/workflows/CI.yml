@@ -41,6 +41,7 @@ jobs:
             docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-debian
             build: |
               echo "Installing dependencies for x86_64 native compilation..."
+              sudo apt-get update
               sudo apt-get install -y --no-install-recommends \
                 pkg-config \
                 libx11-dev \
@@ -70,6 +71,7 @@ jobs:
             docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-debian-aarch64
             build: |
               echo "Installing dependencies for aarch64-unknown-linux-gnu native compilation..."
+              sudo apt-get update
               sudo apt-get install -y --no-install-recommends \
                 pkg-config \
                 libx11-dev \
