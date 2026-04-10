@@ -126,7 +126,6 @@ pub fn write_clipboard_file_paths(paths: Vec<String>) -> Result<(), NapiError> {
 
     // パスが有効であれば OS 依存の実装に委譲
     current_platform::write_clipboard_file_paths(&paths).map_err(platform_error_to_napi)?;
-    println!("write_clipboard_file_paths: {:?}", &paths);
   }
 
   #[cfg(not(any(target_os = "windows", target_os = "macos", target_os = "linux")))]
@@ -188,10 +187,8 @@ pub fn read_clipboard_file_paths() -> napi::Result<ClipboardContent> {
   };
 
   // 両方エラーであれば、エラーを返す
-  if internal_result.file_paths.is_err() && internal_result.text.is_err() {
-    // ファイルパスとテキストの両方が取得できなかった場合
-    let file_paths_err = internal_result.file_paths.unwrap_err();
-    let text_err = internal_result.text.unwrap_err();
+  if let (Err(file_paths_err), Err(text_err)) = (&internal_result.file_paths, &internal_result.text)
+  {
     return Err(NapiError::from_reason(format!(
       "Failed to read clipboard content: file paths error: {}, text error: {}",
       file_paths_err.reason, text_err.reason

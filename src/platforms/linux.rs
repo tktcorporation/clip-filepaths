@@ -3,6 +3,7 @@
 use std::fs;
 use std::io::{Error, ErrorKind};
 use std::process::Command;
+use url::Url;
 
 // xclip コマンドを使用してファイルパスをクリップボードにコピーする
 pub fn write_clipboard_file_paths(paths: &[String]) -> Result<(), Error> {
@@ -22,9 +23,17 @@ pub fn write_clipboard_file_paths(paths: &[String]) -> Result<(), Error> {
         }
       };
 
-      // file:// URIを作成
-      let uri = format!("file://{}", canonical_path.display());
-      uri_paths.push(uri);
+      // file:// URIを作成（特殊文字を正しくエンコード）
+      let uri = Url::from_file_path(&canonical_path).map_err(|_| {
+        Error::new(
+          ErrorKind::InvalidInput,
+          format!(
+            "Failed to convert path to URI: {}",
+            canonical_path.display()
+          ),
+        )
+      })?;
+      uri_paths.push(uri.to_string());
     }
 
     // 無効なパスが一つでもあればエラー
@@ -59,14 +68,7 @@ pub fn write_clipboard_file_paths(paths: &[String]) -> Result<(), Error> {
     });
 
   match status {
-    Ok(exit_status) if exit_status.success() => {
-      if paths.is_empty() {
-        println!("Cleared clipboard data (empty file list)");
-      } else {
-        println!("Copied {} files to clipboard on Linux", paths.len());
-      }
-      Ok(())
-    }
+    Ok(exit_status) if exit_status.success() => Ok(()),
     Ok(exit_status) => Err(Error::other(format!(
       "xclip command failed with exit code: {:?}",
       exit_status.code()
@@ -155,10 +157,15 @@ pub fn read_clipboard_file_paths() -> Result<Vec<String>, Error> {
         continue;
       }
 
-      // file:// URIをファイルパスに変換
+      // file:// URIをファイルパスに変換（URLデコード付き）
       if line.starts_with("file://") {
-        let path = line.trim_start_matches("file://");
-        paths.push(path.to_string());
+        if let Ok(url) = Url::parse(line) {
+          if let Ok(path) = url.to_file_path() {
+            if let Some(path_str) = path.to_str() {
+              paths.push(path_str.to_string());
+            }
+          }
+        }
       }
     }
 
@@ -189,12 +196,12 @@ mod tests {
 
     let path_str = test_file_path.to_string_lossy().to_string();
     let canonical_path = test_file_path.canonicalize().unwrap();
-    let expected_uri = format!("file://{}", canonical_path.to_string_lossy());
+    let expected_uri = Url::from_file_path(&canonical_path).unwrap().to_string();
 
     let mut uris = Vec::new();
     let path = Path::new(&path_str);
     if let Ok(abs_path) = path.canonicalize() {
-      let uri = format!("file://{}", abs_path.to_string_lossy());
+      let uri = Url::from_file_path(&abs_path).unwrap().to_string();
       uris.push(uri);
     }
 
