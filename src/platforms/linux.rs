@@ -157,12 +157,16 @@ pub fn read_clipboard_file_paths() -> Result<Vec<String>, Error> {
 
       // file:// URIをファイルパスに変換（URLデコード付き）
       if line.starts_with("file://") {
-        if let Ok(url) = Url::parse(line) {
-          if let Ok(path) = url.to_file_path() {
-            if let Some(path_str) = path.to_str() {
-              paths.push(path_str.to_string());
-            }
-          }
+        match Url::parse(line) {
+          Ok(url) => match url.to_file_path() {
+            Ok(path) => match path.to_str() {
+              Some(path_str) => paths.push(path_str.to_string()),
+              // 非UTF-8パスはOsStringでは表現できるが、Stringとして返す都合上スキップ
+              None => eprintln!("Warning: skipping non-UTF-8 path from URI: {line}"),
+            },
+            Err(_) => eprintln!("Warning: failed to convert URI to file path: {line}"),
+          },
+          Err(e) => eprintln!("Warning: failed to parse clipboard URI: {line}: {e}"),
         }
       }
     }

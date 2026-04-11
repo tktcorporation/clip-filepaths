@@ -3,7 +3,8 @@ edition = "2024"
 name = "clip-filepaths"
 version = "0.1.0"
 # rust-toolchain.toml の channel と一致させること。
-# edition 2024 の resolver v3 がこの値を使って依存の互換性を自動チェックする。
+# edition 2024 では resolver v3 がデフォルトになり、
+# rust-version を使って依存の MSRV 互換性を自動チェックする。
 rust-version = "1.88"
 
 [lib]
@@ -38,7 +39,9 @@ x11 = { version = "2.21.0", features = ["xlib"] }
 libc = "0.2.169"
 
 [build-dependencies]
-napi-build = "2"
+# napi-build 2.2+ は Rust 1.82 より新しい MSRV を要求するため上限を設定。
+# rust-version (MSRV) を上げた場合はこの制約の見直しが可能。
+napi-build = ">=2.0.1, <2.2"
 
 [profile.release]
 lto = true
