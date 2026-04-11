@@ -79,7 +79,6 @@ pub fn write_clipboard_file_paths(paths: &[String]) -> Result<(), Error> {
 
   // 空の配列の場合は、クリップボードをクリアして終了
   if paths.is_empty() {
-    println!("Cleared clipboard data (empty file list)");
     return Ok(());
   }
 
@@ -121,7 +120,6 @@ pub fn write_clipboard_file_paths(paths: &[String]) -> Result<(), Error> {
   let success = pasteboard.write_objects(&urls_array);
 
   if success {
-    println!("Copied {} files to clipboard on macOS", urls.len());
     Ok(())
   } else {
     Err(Error::new(

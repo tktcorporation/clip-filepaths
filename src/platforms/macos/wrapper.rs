@@ -97,11 +97,7 @@ impl ObjcUrl {
     let url_class: id = unsafe { msg_send![class!(NSURL), class] };
     let url: id = unsafe { msg_send![url_class, fileURLWithPath:path_string.as_id()] };
 
-    if url != nil {
-      Some(Self { url })
-    } else {
-      None
-    }
+    if url != nil { Some(Self { url }) } else { None }
   }
 
   /// Rust文字列のパスから直接NSURLを作成
@@ -190,11 +186,7 @@ impl ObjcArray {
     }
 
     let object: id = unsafe { msg_send![self.array, objectAtIndex:index] };
-    if object != nil {
-      Some(object)
-    } else {
-      None
-    }
+    if object != nil { Some(object) } else { None }
   }
 
   /// NSArrayオブジェクトをidとして取得
@@ -283,11 +275,7 @@ impl Pasteboard {
   pub fn data_for_type(&self, type_id: id) -> Option<id> {
     let data: id = unsafe { msg_send![self.pasteboard, dataForType:type_id] };
 
-    if data != nil {
-      Some(data)
-    } else {
-      None
-    }
+    if data != nil { Some(data) } else { None }
   }
 
   /// NSPasteboardオブジェクトをidとして取得

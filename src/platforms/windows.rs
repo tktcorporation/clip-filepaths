@@ -1,8 +1,8 @@
 #![cfg(target_os = "windows")]
 
-use std::ffi::c_void;
 use std::ffi::OsStr;
 use std::ffi::OsString;
+use std::ffi::c_void;
 use std::io::{Error, ErrorKind};
 use std::iter::once;
 use std::mem::{size_of, zeroed};
@@ -10,6 +10,7 @@ use std::os::windows::ffi::OsStrExt;
 use std::os::windows::ffi::OsStringExt;
 use std::path::Path;
 use std::ptr;
+use url::Url;
 
 use windows_sys::Win32::{
   Foundation::{GetLastError, HWND},
@@ -18,7 +19,7 @@ use windows_sys::Win32::{
       CloseClipboard, EmptyClipboard, GetClipboardData, IsClipboardFormatAvailable, OpenClipboard,
       SetClipboardData,
     },
-    Memory::{GlobalAlloc, GlobalLock, GlobalSize, GlobalUnlock, GMEM_MOVEABLE},
+    Memory::{GMEM_MOVEABLE, GlobalAlloc, GlobalLock, GlobalSize, GlobalUnlock},
   },
   UI::Shell::DragQueryFileW,
 };
@@ -44,7 +45,7 @@ fn to_wide_null(s: &str) -> Vec<u16> {
 
 // HGLOBAL用のGlobalFree関数（Kernel32.dllから直接インポート）
 #[link(name = "kernel32")]
-extern "system" {
+unsafe extern "system" {
   fn GlobalFree(hMem: *mut c_void) -> *mut c_void;
 }
 
@@ -73,7 +74,6 @@ pub fn write_clipboard_file_paths(paths: &[String]) -> Result<(), Error> {
     // 空の配列の場合はクリップボードをクリアして終了
     if paths.is_empty() {
       CloseClipboard();
-      println!("Cleared clipboard data (empty file list)");
       return Ok(());
     }
 
@@ -87,8 +87,27 @@ pub fn write_clipboard_file_paths(paths: &[String]) -> Result<(), Error> {
 
     // 2. DROPFILES 構造体とパスリストを格納するためのメモリサイズを計算
     let dropfiles_size = std::mem::size_of::<DROPFILES>();
-    let paths_size = wide_paths.len() * std::mem::size_of::<u16>();
-    let total_size = dropfiles_size + paths_size;
+    let paths_size = wide_paths
+      .len()
+      .checked_mul(std::mem::size_of::<u16>())
+      .ok_or_else(|| {
+        CloseClipboard();
+        Error::new(ErrorKind::InvalidInput, "Path data size overflow")
+      })?;
+    let total_size = dropfiles_size.checked_add(paths_size).ok_or_else(|| {
+      CloseClipboard();
+      Error::new(ErrorKind::InvalidInput, "Total allocation size overflow")
+    })?;
+
+    // メモリアロケーションの上限チェック（1GBを超えるクリップボードデータは異常）
+    const MAX_CLIPBOARD_SIZE: usize = 1 << 30;
+    if total_size > MAX_CLIPBOARD_SIZE {
+      CloseClipboard();
+      return Err(Error::new(
+        ErrorKind::InvalidInput,
+        format!("Clipboard data too large: {} bytes", total_size),
+      ));
+    }
 
     // 3. グローバルメモリを確保
     // CF_HDROP は GMEM_MOVEABLE である必要がある
@@ -143,22 +162,20 @@ pub fn write_clipboard_file_paths(paths: &[String]) -> Result<(), Error> {
     }
 
     // 9. ファイルパスをURLとしてもクリップボードに設定する (CF_UNICODETEXT形式)
-    // ファイルパスをURLに変換して連結
+    // ファイルパスをURLに変換して連結（url crateで正しくエンコード）
     let url_text = paths
       .iter()
-      .map(|path| {
-        // 絶対パスに変換
+      .filter_map(|path| {
         let path = Path::new(path);
         let abs_path = if path.is_absolute() {
           path.to_path_buf()
         } else {
-          std::env::current_dir().unwrap_or_default().join(path)
+          match std::env::current_dir() {
+            Ok(cwd) => cwd.join(path),
+            Err(_) => return None,
+          }
         };
-
-        // パスをURLに変換 (file:///C:/path/to/file.txt 形式)
-        let path_str = abs_path.to_string_lossy();
-        let file_url = format!("file:///{}", path_str.replace('\\', "/"));
-        file_url
+        Url::from_file_path(&abs_path).ok().map(|u| u.to_string())
       })
       .collect::<Vec<String>>()
       .join("\n");
@@ -200,7 +217,6 @@ pub fn write_clipboard_file_paths(paths: &[String]) -> Result<(), Error> {
       eprintln!("Warning: Failed to close clipboard: {}", GetLastError());
     }
 
-    println!("Copied {} files to clipboard on Windows", paths.len());
     Ok(())
   } // unsafe ブロック終了
 }

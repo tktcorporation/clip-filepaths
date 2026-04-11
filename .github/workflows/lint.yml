@@ -33,9 +33,7 @@ jobs:
       - name: Setup Rust
         uses: ./.github/actions/setup-rust
         with:
-          toolchain: stable
           install-dependencies: true
-          components: clippy, rustfmt
 
       - name: Run JavaScript lints
         uses: ./.github/actions/lint-js

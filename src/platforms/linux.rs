@@ -3,6 +3,7 @@
 use std::fs;
 use std::io::{Error, ErrorKind};
 use std::process::Command;
+use url::Url;
 
 // xclip コマンドを使用してファイルパスをクリップボードにコピーする
 pub fn write_clipboard_file_paths(paths: &[String]) -> Result<(), Error> {
@@ -17,14 +18,22 @@ pub fn write_clipboard_file_paths(paths: &[String]) -> Result<(), Error> {
       let canonical_path = match fs::canonicalize(path) {
         Ok(p) => p,
         Err(e) => {
-          errors.push(format!("Failed to canonicalize path {}: {}", path, e));
+          errors.push(format!("Failed to canonicalize path {path}: {e}"));
           continue;
         }
       };
 
-      // file:// URIを作成
-      let uri = format!("file://{}", canonical_path.display());
-      uri_paths.push(uri);
+      // file:// URIを作成（特殊文字を正しくエンコード）
+      let uri = Url::from_file_path(&canonical_path).map_err(|_| {
+        Error::new(
+          ErrorKind::InvalidInput,
+          format!(
+            "Failed to convert path to URI: {}",
+            canonical_path.display()
+          ),
+        )
+      })?;
+      uri_paths.push(uri.to_string());
     }
 
     // 無効なパスが一つでもあればエラー
@@ -59,21 +68,13 @@ pub fn write_clipboard_file_paths(paths: &[String]) -> Result<(), Error> {
     });
 
   match status {
-    Ok(exit_status) if exit_status.success() => {
-      if paths.is_empty() {
-        println!("Cleared clipboard data (empty file list)");
-      } else {
-        println!("Copied {} files to clipboard on Linux", paths.len());
-      }
-      Ok(())
-    }
+    Ok(exit_status) if exit_status.success() => Ok(()),
     Ok(exit_status) => Err(Error::other(format!(
       "xclip command failed with exit code: {:?}",
       exit_status.code()
     ))),
     Err(e) => Err(Error::other(format!(
-      "Failed to execute xclip command: {}",
-      e
+      "Failed to execute xclip command: {e}"
     ))),
   }
 }
@@ -96,7 +97,7 @@ pub fn read_clipboard_text() -> Result<String, Error> {
     }
   } else {
     let error = String::from_utf8_lossy(&output.stderr).into_owned();
-    Err(Error::other(format!("Failed to read clipboard: {}", error)))
+    Err(Error::other(format!("Failed to read clipboard: {error}")))
   }
 }
 
@@ -118,8 +119,7 @@ pub fn read_clipboard_raw() -> Result<Vec<u8>, Error> {
   } else {
     let error = String::from_utf8_lossy(&output.stderr).into_owned();
     Err(Error::other(format!(
-      "Failed to read clipboard raw data: {}",
-      error
+      "Failed to read clipboard raw data: {error}"
     )))
   }
 }
@@ -155,10 +155,19 @@ pub fn read_clipboard_file_paths() -> Result<Vec<String>, Error> {
         continue;
       }
 
-      // file:// URIをファイルパスに変換
+      // file:// URIをファイルパスに変換（URLデコード付き）
       if line.starts_with("file://") {
-        let path = line.trim_start_matches("file://");
-        paths.push(path.to_string());
+        match Url::parse(line) {
+          Ok(url) => match url.to_file_path() {
+            Ok(path) => match path.to_str() {
+              Some(path_str) => paths.push(path_str.to_string()),
+              // 非UTF-8パスはOsStringでは表現できるが、Stringとして返す都合上スキップ
+              None => eprintln!("Warning: skipping non-UTF-8 path from URI: {line}"),
+            },
+            Err(_) => eprintln!("Warning: failed to convert URI to file path: {line}"),
+          },
+          Err(e) => eprintln!("Warning: failed to parse clipboard URI: {line}: {e}"),
+        }
       }
     }
 
@@ -167,8 +176,7 @@ pub fn read_clipboard_file_paths() -> Result<Vec<String>, Error> {
   } else {
     let error = String::from_utf8_lossy(&output.stderr).into_owned();
     Err(Error::other(format!(
-      "Failed to read clipboard for file paths: {}",
-      error
+      "Failed to read clipboard for file paths: {error}"
     )))
   }
 }
@@ -189,12 +197,12 @@ mod tests {
 
     let path_str = test_file_path.to_string_lossy().to_string();
     let canonical_path = test_file_path.canonicalize().unwrap();
-    let expected_uri = format!("file://{}", canonical_path.to_string_lossy());
+    let expected_uri = Url::from_file_path(&canonical_path).unwrap().to_string();
 
     let mut uris = Vec::new();
     let path = Path::new(&path_str);
     if let Ok(abs_path) = path.canonicalize() {
-      let uri = format!("file://{}", abs_path.to_string_lossy());
+      let uri = Url::from_file_path(&abs_path).unwrap().to_string();
       uris.push(uri);
     }
 
@@ -219,9 +227,11 @@ mod tests {
     // エラーの種類とメッセージを検証
     if let Err(err) = result {
       assert_eq!(err.kind(), ErrorKind::InvalidInput);
-      assert!(err
-        .to_string()
-        .contains("Some paths could not be processed"));
+      assert!(
+        err
+          .to_string()
+          .contains("Some paths could not be processed")
+      );
     }
   }
 
@@ -245,12 +255,12 @@ mod tests {
         || e.to_string().contains("No text property")
       // Wayland で発生しうるエラー
       {
-        println!("⚠️ クリップボードテストをスキップ: 環境の問題 ({})", e);
+        println!("⚠️ クリップボードテストをスキップ: 環境の問題 ({e})");
         return;
       }
     }
 
-    assert!(result.is_ok(), "Copy operation failed: {:?}", result);
+    assert!(result.is_ok(), "Copy operation failed: {result:?}");
 
     let _ = std::fs::remove_file(test_file_path);
   }

@@ -110,7 +110,7 @@ pub fn write_clipboard_file_paths(paths: Vec<String>) -> Result<(), NapiError> {
     for p in &paths {
       if let Err(e) = fs::canonicalize(p) {
         // Linux/macOS 実装に合わせてメッセージを生成
-        errors.push(format!("Failed to canonicalize path {}: {}", p, e));
+        errors.push(format!("Failed to canonicalize path {p}: {e}"));
       }
     }
 
@@ -118,7 +118,7 @@ pub fn write_clipboard_file_paths(paths: Vec<String>) -> Result<(), NapiError> {
       let joined = errors.join("; ");
       let io_err = IoError::new(
         ErrorKind::InvalidInput,
-        format!("Some paths could not be processed: {}", joined),
+        format!("Some paths could not be processed: {joined}"),
       );
       // OS名前付きの共通メッセージに変換
       return Err(platform_error_to_napi(io_err));
@@ -126,7 +126,6 @@ pub fn write_clipboard_file_paths(paths: Vec<String>) -> Result<(), NapiError> {
 
     // パスが有効であれば OS 依存の実装に委譲
     current_platform::write_clipboard_file_paths(&paths).map_err(platform_error_to_napi)?;
-    println!("write_clipboard_file_paths: {:?}", &paths);
   }
 
   #[cfg(not(any(target_os = "windows", target_os = "macos", target_os = "linux")))]
@@ -188,10 +187,8 @@ pub fn read_clipboard_file_paths() -> napi::Result<ClipboardContent> {
   };
 
   // 両方エラーであれば、エラーを返す
-  if internal_result.file_paths.is_err() && internal_result.text.is_err() {
-    // ファイルパスとテキストの両方が取得できなかった場合
-    let file_paths_err = internal_result.file_paths.unwrap_err();
-    let text_err = internal_result.text.unwrap_err();
+  if let (Err(file_paths_err), Err(text_err)) = (&internal_result.file_paths, &internal_result.text)
+  {
     return Err(NapiError::from_reason(format!(
       "Failed to read clipboard content: file paths error: {}, text error: {}",
       file_paths_err.reason, text_err.reason
@@ -211,14 +208,14 @@ pub fn read_clipboard_file_paths() -> napi::Result<ClipboardContent> {
       if result.text.is_none() && internal_result.text.is_err() {
         // テキストもファイルパスも取得できなかった場合、raw読み取りを試みる
         #[cfg(any(target_os = "windows", target_os = "macos", target_os = "linux"))]
-        if let Ok(raw_data) = current_platform::read_clipboard_raw() {
-          if !raw_data.is_empty() {
-            // UTF-8として解釈を試みる
-            if let Ok(text) = String::from_utf8(raw_data.clone()) {
-              if !text.trim().is_empty() {
-                result.text = Some(text);
-              }
-            }
+        if let Ok(raw_data) = current_platform::read_clipboard_raw()
+          && !raw_data.is_empty()
+        {
+          // UTF-8として解釈を試みる
+          if let Ok(text) = String::from_utf8(raw_data.clone())
+            && !text.trim().is_empty()
+          {
+            result.text = Some(text);
           }
         }
       }
@@ -260,7 +257,7 @@ mod tests {
   #[test]
   fn test_write_clipboard_file_paths_empty_input() {
     let result = write_clipboard_file_paths(vec![]);
-    println!("test_write_clipboard_file_paths_empty_input: {:?}", result);
+    println!("test_write_clipboard_file_paths_empty_input: {result:?}");
     assert!(result.is_ok());
   }
 
@@ -273,13 +270,13 @@ mod tests {
 
     for i in 0..2 {
       let mut path = temp_dir();
-      path.push(format!("electron_pan_clip_test_{}.txt", i));
+      path.push(format!("electron_pan_clip_test_{i}.txt"));
 
       let file_path = path.to_string_lossy().to_string();
 
       // ファイルを作成して何か書き込む
       let mut file = File::create(&path).expect("Failed to create test file");
-      writeln!(file, "Test content {}", i).expect("Failed to write to test file");
+      writeln!(file, "Test content {i}").expect("Failed to write to test file");
 
       temp_files.push(file_path);
     }
@@ -288,7 +285,7 @@ mod tests {
     let result = write_clipboard_file_paths(temp_files.clone());
 
     // コピー成功を確認
-    assert!(result.is_ok(), "Failed to copy files: {:?}", result);
+    assert!(result.is_ok(), "Failed to copy files: {result:?}");
 
     // ここではクリップボードの内容を自動的に検証することは難しいため、
     // 成功したことだけを確認する
@@ -308,13 +305,13 @@ mod tests {
 
     for i in 0..2 {
       let mut path = temp_dir();
-      path.push(format!("electron_pan_clip_test_results_{}.txt", i));
+      path.push(format!("electron_pan_clip_test_results_{i}.txt"));
 
       let file_path_str = path.to_string_lossy().to_string();
 
       // ファイルを作成
       let mut file = File::create(&path).expect("Failed to create test file");
-      writeln!(file, "Test content {}", i).expect("Failed to write to test file");
+      writeln!(file, "Test content {i}").expect("Failed to write to test file");
 
       test_paths.push(file_path_str);
       canonical_paths.push(path.canonicalize().unwrap().to_string_lossy().to_string());
