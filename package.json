@@ -54,6 +54,14 @@
     "typescript": "^5.8.3",
     "vitest": "^3.1.2"
   },
+  "resolutions": {
+    "vite": "^6.4.2",
+    "rollup": "^4.60.2",
+    "tar": "^7.5.13",
+    "minimatch": "^9.0.9",
+    "glob": "^10.5.0",
+    "picomatch": "^4.0.4"
+  },
   "scripts": {
     "artifacts": "napi artifacts",
     "build": "napi build --platform --release",
