@@ -40,6 +40,7 @@ jobs:
             target: x86_64-unknown-linux-gnu
             docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-debian
             build: |
+              node --version
               rustup show
               echo "Installing dependencies for x86_64 native compilation..."
               sudo apt-get update
@@ -53,6 +54,7 @@ jobs:
             target: x86_64-unknown-linux-musl
             docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-alpine
             build: |
+              node --version
               rustup show
               echo "Installing dependencies for x86_64-unknown-linux-musl native compilation..."
               apk add --no-cache \
@@ -72,6 +74,7 @@ jobs:
             target: aarch64-unknown-linux-gnu
             docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-debian-aarch64
             build: |
+              node --version
               rustup show
               rustup target add aarch64-unknown-linux-gnu
               echo "Installing dependencies for aarch64-unknown-linux-gnu native compilation..."
@@ -89,6 +92,7 @@ jobs:
             target: aarch64-unknown-linux-musl
             docker: ghcr.io/napi-rs/napi-rs/nodejs-rust:lts-alpine
             build: |
+              node --version
               rustup show
               echo "Installing dependencies for aarch64-unknown-linux-musl native compilation..."
               apk add --no-cache \
@@ -179,8 +183,8 @@ jobs:
           - host: windows-latest
             target: x86_64-pc-windows-msvc
         node:
-          - '22'
-          - '24'
+          - '22.23.4'
+          - '24.22.1'
     runs-on: ${{ matrix.settings.host }}
     steps:
       - uses: actions/checkout@v4
@@ -210,8 +214,8 @@ jobs:
       fail-fast: false
       matrix:
         node:
-          - '22'
-          - '24'
+          - '22.23.4'
+          - '24.22.1'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -240,8 +244,8 @@ jobs:
       fail-fast: false
       matrix:
         node:
-          - '22'
-          - '24'
+          - '22.23.4'
+          - '24.22.1'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -272,8 +276,8 @@ jobs:
       fail-fast: false
       matrix:
         node:
-          - '22'
-          - '24'
+          - '22.23.4'
+          - '24.22.1'
     runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@v4
@@ -305,7 +309,7 @@ jobs:
             yarn test:unit
             ls -la
   test-linux-aarch64-musl-binding:
-    name: Test bindings on aarch64-unknown-linux-musl - node@lts
+    name: Test bindings on aarch64-unknown-linux-musl - node@24.22.1
     needs:
       - build
     runs-on: ubuntu-24.04-arm
@@ -332,7 +336,7 @@ jobs:
       - name: Setup and run tests
         uses: addnab/docker-run-action@v3
         with:
-          image: node:lts-alpine
+          image: node:24.22.1-alpine
           options: '--platform linux/arm64 -v ${{ github.workspace }}:/build -w /build'
           run: |
             set -e
