@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        node: [20, 22]  # Node.jsバージョン例（NAPI用）
+        node: ['22.23.4', '24.22.1']  # 修正版 Node.js（NAPI用）
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
