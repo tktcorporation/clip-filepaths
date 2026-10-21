@@ -104,15 +104,14 @@ jobs:
               export PKG_CONFIG_ALLOW_CROSS=1
               export PKG_CONFIG_PATH="/usr/lib/pkgconfig:/usr/share/pkgconfig"
               yarn build --target aarch64-unknown-linux-musl
-    name: stable - ${{ matrix.settings.target }} - node@20
+    name: stable - ${{ matrix.settings.target }}
     runs-on: ${{ matrix.settings.host }}
     steps:
       - uses: actions/checkout@v4
       - name: Setup node
         uses: actions/setup-node@v4
-        if: ${{ !matrix.settings.docker }}
         with:
-          node-version: 20
+          node-version: 22.23.4
           cache: yarn
       - name: Install Rust (reads rust-toolchain.toml)
         if: ${{ !matrix.settings.docker }}
@@ -147,7 +146,7 @@ jobs:
         uses: actions/setup-node@v4
         if: matrix.settings.target == 'i686-pc-windows-msvc'
         with:
-          node-version: 20
+          node-version: 22.23.4
           cache: yarn
           architecture: x86
       - name: Build in docker
@@ -180,7 +179,6 @@ jobs:
           - host: windows-latest
             target: x86_64-pc-windows-msvc
         node:
-          - '20'
           - '22'
           - '24'
     runs-on: ${{ matrix.settings.host }}
@@ -212,7 +210,6 @@ jobs:
       fail-fast: false
       matrix:
         node:
-          - '20'
           - '22'
           - '24'
     runs-on: ubuntu-latest
@@ -243,7 +240,6 @@ jobs:
       fail-fast: false
       matrix:
         node:
-          - '20'
           - '22'
           - '24'
     runs-on: ubuntu-latest
@@ -276,12 +272,16 @@ jobs:
       fail-fast: false
       matrix:
         node:
-          - '20'
           - '22'
           - '24'
     runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@v4
+      - name: Setup node for dependencies
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.23.4
+          cache: yarn
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
@@ -311,6 +311,11 @@ jobs:
     runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@v4
+      - name: Setup node for dependencies
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.23.4
+          cache: yarn
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
@@ -346,7 +351,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22.23.4
           cache: yarn
       - name: Install dependencies
         run: yarn install
