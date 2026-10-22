@@ -1,6 +1,6 @@
 {
   "name": "clip-filepaths",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "main": "index.js",
   "types": "index.d.ts",
   "description": "📋 Copy multiple file paths (including images) to clipboard - A cross platform utility.",

@@ -4,7 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
 ## [Unreleased]
+
+### 🐛 Bug Fixes
+
+- Encode and decode Linux clipboard file URIs correctly, including paths with special characters, and check Windows clipboard allocation sizes ([#34](https://github.com/tktcorporation/clip-filepaths/pull/34)).
+- Remove routine clipboard copy and clear messages from standard output ([#34](https://github.com/tktcorporation/clip-filepaths/pull/34)). Malformed Linux URI warnings can still include the URI.
+
+### 📦 Dependencies and Build
+
+- Refresh Rust dependencies and add JavaScript dependency resolutions for development security fixes ([#34](https://github.com/tktcorporation/clip-filepaths/pull/34), [#35](https://github.com/tktcorporation/clip-filepaths/pull/35)).
+- Use patched Node.js 22.23.4 for local tooling and CI hosts, and exact patched Node.js 22.23.4 and 24.22.1 for binding tests ([#37](https://github.com/tktcorporation/clip-filepaths/pull/37)). The third-party native build images still contain end-of-life Node.js 18 or 20.
+
+## [0.3.0] - 2025-08-11
 
 ### 🐛 Bug Fixes
 
