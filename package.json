@@ -52,10 +52,11 @@
     "@types/node": "^22.15.2",
     "git-cliff": "^2.8.0",
     "typescript": "^5.8.3",
-    "vitest": "^3.1.2"
+    "vitest": "^4.1.12"
   },
   "resolutions": {
-    "vite": "^6.4.2",
+    "vite": "^6.4.5",
+    "brace-expansion@npm:^2.0.2": "npm:2.1.7",
     "rollup": "^4.60.2",
     "tar": "^7.5.13",
     "minimatch": "^9.0.9",
